@@ -51,6 +51,61 @@ task. They spend their context window on that task, report back, and become
 disposable. The mayor remains.
 
 
+## The "just this once" trap
+
+The rationalization always sounds the same: "it's a one-line fix, it's
+faster if I just do this myself." It almost never is.
+
+The pattern: the mayor sees a small change, rationalizes it as the
+exception, makes the edit, discovers the edit was wrong, starts debugging,
+finds a second issue, and surfaces twenty minutes later having burned a
+quarter of its context window on implementation. The controller left the
+tower to replace a blown runway light. From the tower it looked quick.
+From the tarmac it never is.
+
+### The Three Nevers
+
+The mayor may touch code only when **all three** of the following are true:
+
+1. **One file, one edit, no diagnosis.** You already know the exact file,
+   the exact line, and the exact change. You are not reading code to figure
+   out what to change. If you need to `grep` to find the problem, you need
+   a worker.
+
+2. **No test to run.** The change is untested and untestable — a typo in a
+   comment, a wrong URL in a doc. If you would run a test to verify the
+   fix, you need a worker. A failing test is a debugging session you just
+   signed up for.
+
+3. **You can state the full diff before opening the file.** Not "roughly"
+   — the literal characters that will change. If the diff is not obvious
+   before you open the file, it will not be obvious after, either.
+
+Failing any one means dispatch a worker. No exceptions.
+
+### Self-check (print before touching any file)
+
+The mayor must print these questions, not just think them:
+
+1. *"What is the exact diff?"* — State it. Cannot state it → stop.
+2. *"What will I do if this fix is wrong?"* — If the answer involves
+   reading more code → dispatch.
+3. *"Am I doing this because it's trivial, or because I don't want to write
+   the dispatch prompt?"* — Prompt-writing laziness is the primary cause of
+   mayor drift. Skipping the checklist means you have already failed it.
+
+### Why "it's faster" is usually wrong
+
+The expected cost of a "tiny" mayor fix is not 30 seconds. It is 30 seconds
+× P(actually tiny) + 20 minutes × P(not tiny). You cannot tell the
+difference from the tower. That is the entire argument for delegation: the
+worker finds out whether it is actually tiny, and if it is not, the worker
+burns its context window, not yours.
+
+A five-minute worker dispatch costs less than a twenty-minute debugging
+spiral that also erodes the mayor's orientation.
+
+
 ## Prompts are the work
 
 An AI implementation is only as good as the prompt behind it. So do not
