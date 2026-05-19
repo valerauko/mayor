@@ -54,7 +54,7 @@ relative patch paths can land in the mayor checkout.
 
 Before every file edit, run:
 
-Get-Location; git rev-parse --show-toplevel; git status --short --branch
+pwd; git rev-parse --show-toplevel; git status --short --branch
 
 Only edit if git rev-parse --show-toplevel prints exactly:
 <ASSIGNED_WORKTREE>
@@ -63,15 +63,13 @@ When using apply_patch or any edit tool, use absolute file paths under
 <ASSIGNED_WORKTREE> if the tool accepts them.
 
 If the edit tool does not accept absolute paths, use paths relative to
-the session root that explicitly target the worker worktree. That
-usually means walking out of the mayor checkout and into the worktree
-root:
+the session root that explicitly target the worker worktree:
 
 <WORKTREE_ROOT>/<WORKTREE_NAME>/<repo-relative-path>
 
-Never use repo-relative edit paths such as `<repo-relative-path>` on
-their own unless `git rev-parse --show-toplevel` for the agent session
-root itself is the assigned worktree.
+Never use bare repo-relative edit paths unless `git rev-parse
+--show-toplevel` for the agent session root is itself the assigned
+worktree.
 
 After the first edit, immediately run:
 
@@ -82,41 +80,34 @@ Continue only if the worker worktree is dirty and the mayor checkout
 did not receive code edits.
 
 If any edit lands outside <ASSIGNED_WORKTREE>, stop immediately and
-report it. Do not repair, restore, clean up, commit, or push until the
-mayor tells you what to do.
+report it. Do not repair, restore, commit, or push until the mayor
+tells you what to do.
 ```
+
+**Note:** A PreToolUse hook also guards against path-resolution leaks
+automatically. The boundary block above is defense-in-depth.
 
 ### Mayor checks after dispatch
 
 - Check the mayor checkout immediately after dispatching:
   `git status --short --branch`.
-- If the mayor checkout gains unexpected code changes, interrupt the
-  worker before it does more work.
-- Preserve any accidental changes into the worker worktree before
-  restoring the mayor checkout.
-- Only restore specific known files after preservation. Do **not** use
-  broad destructive reset commands.
+- If the mayor checkout gains unexpected code edits, interrupt the
+  worker, preserve the edits into the worker worktree, then restore
+  the mayor checkout — only specific known files; never broad resets.
 
 ## Common preamble (every dispatch)
 
 ```
 You are implementing bead **<BEAD_ID>** in <project description>.
 
-<include project stance obtained from operator>
+<project stance, obtained from operator — pre-alpha, production-stable, etc.>
 ```
 
 ## Worktree path convention
 
-Per project policy, worker worktrees live under:
-
-```
-<WORKTREE_ROOT>
-```
-
-Not inside the mayor checkout (would mix worker edits into the mayor's
-working tree).
-Not `.claude/worktrees/agent-*` (forbidden — leaks edits to mayor checkout
-via tool-path-resolution quirks; see "Worktree boundary" above).
+Worker worktrees live under `ai/worktrees/`. They are created
+automatically when a worker agent with `isolation: worktree` starts.
+The worktree is cleaned up automatically if the worker makes no changes.
 
 ---
 
@@ -142,10 +133,8 @@ via tool-path-resolution quirks; see "Worktree boundary" above).
 
 ## Process
 
-1. Worktree off origin/main at
-   `<WORKTREE_ROOT>/<descriptive>-<BEAD_ID>`
-   with branch `worker/<descriptive>-<BEAD_ID>`.
-   Do NOT use `.claude/worktrees/`.
+1. You are running in an isolated worktree. Verify with
+   `git rev-parse --show-toplevel` before any edit.
 2. Include worktree-boundary block (see Constraints).
 3. `bd update <BEAD_ID> --claim` then `bd update <BEAD_ID> --status=in_progress`.
 4. Implement.
@@ -182,9 +171,8 @@ N. **<BEAD_ID-N> (P1 BUG)** — <one-line + concrete fix sketch + regression tes
 
 ## Process
 
-1. Worktree at
-   `<WORKTREE_ROOT>/<cluster-name>-<HEAD_BEAD_ID>`
-   with branch `worker/<cluster-name>-<HEAD_BEAD_ID>`.
+1. You are running in an isolated worktree. Verify with
+   `git rev-parse --show-toplevel` before any edit.
 2. Include worktree-boundary block.
 3. For each bead: `bd update <BEAD_ID> --claim` + `--status=in_progress`
    BEFORE that bead's commit.
@@ -237,9 +225,8 @@ Read `<surface>` end-to-end and produce a findings report identifying:
 
 ## Process
 
-1. Worktree at
-   `<WORKTREE_ROOT>/<surface>-audit-<BEAD_ID>`
-   with branch `worker/<surface>-audit-<BEAD_ID>`.
+1. You are running in an isolated worktree. Verify with
+   `git rev-parse --show-toplevel` before any edit.
 2. Include worktree-boundary block.
 3. `bd update <BEAD_ID> --status=in_progress`.
 4. **WRITE FINDINGS DOC FIRST** to
@@ -347,8 +334,9 @@ PR #NNNN (`<title>`) has a CI failure: `<failing check>`.
 
 ## Concrete steps
 
-1. **Worktree**: `git worktree add
-   <WORKTREE_ROOT>/<branch-name>-fix <branch>`.
+1. **Worktree**: You are in an isolated worktree. Verify
+   `git rev-parse --show-toplevel` and check out the PR branch:
+   `git checkout <branch>`.
 2. Include worktree-boundary block.
 3. <investigation steps>
 4. **Pick the fix**:

@@ -43,6 +43,14 @@ Conformance > taste. If you genuinely think a convention is harmful, surface it.
 ### Rule 13 — Built-in Tools Over Shell Equivalents
 Prefer the agent's native tools for file operations. Read over cat/head/tail. Edit over sed/awk. Write over echo>/heredoc. Grep over shell grep/find. Bash is for runtime commands: git, test runners, builds, installs — not file I/O.
 
+## Worktree Isolation
+
+Worker agents run with `isolation: worktree` — their session root is an isolated git worktree under `ai/worktrees/`, so Edit/Write resolve within the worktree, not the mayor checkout.
+
+A `PreToolUse` hook on Edit|Write verifies the target file is under the current git root. Edits outside the git root are blocked automatically — the worktree boundary block in dispatch prompts is defense-in-depth, not the primary guard.
+
+Beads (`bd`) discovers the shared database via git common directory and works in worktrees without configuration.
+
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:7510c1e2 -->
 ## Beads Issue Tracker
 

@@ -1,6 +1,7 @@
 
 # Mayor Method working files
 ai/findings/
+ai/worktrees/
 
 # Beads / Dolt files (added by bd init)
 .dolt/
