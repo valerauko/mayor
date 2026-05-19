@@ -1,4 +1,10 @@
 {
+  "permissions": {
+    "allow": [
+      "mcp__github__*",
+      "mcp__git__*"
+    ]
+  },
   "hooks": {
     "PreCompact": [
       {
