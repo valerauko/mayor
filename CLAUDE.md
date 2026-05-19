@@ -40,6 +40,9 @@ Conformance > taste. If you genuinely think a convention is harmful, surface it.
 ### Rule 12 — Fail Loud
 "Completed" is wrong if anything was skipped silently. "Tests pass" is wrong if any were skipped. Default to surfacing uncertainty.
 
+### Rule 13 — Built-in Tools Over Shell Equivalents
+Prefer the agent's native tools for file operations. Read over cat/head/tail. Edit over sed/awk. Write over echo>/heredoc. Grep over shell grep/find. Bash is for runtime commands: git, test runners, builds, installs — not file I/O.
+
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:7510c1e2 -->
 ## Beads Issue Tracker
 
