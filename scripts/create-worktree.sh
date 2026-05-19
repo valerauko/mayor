@@ -5,10 +5,10 @@ set -euo pipefail
 
 INPUT=$(cat)
 BASE_PATH=$(printf '%s' "$INPUT" | jq -r '.base_path')
-WORKTREE_NAME=$(printf '%s' "$INPUT" | jq -r '.worktree_name')
-BRANCH_NAME=$(printf '%s' "$INPUT" | jq -r '.branch_name')
+WORKTREE_ID=$(printf '%s' "$INPUT" | jq -r '.worktree_id')
 
-WORKTREE_DIR="$BASE_PATH/ai/worktrees/$WORKTREE_NAME"
+WORKTREE_DIR="$BASE_PATH/ai/worktrees/$WORKTREE_ID"
+BRANCH_NAME="worktree-$WORKTREE_ID"
 
 mkdir -p "$BASE_PATH/ai/worktrees"
 
